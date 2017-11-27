@@ -5,7 +5,7 @@ version = '1.0.0'
 
 
 setup(
-    name='djpwrentch',
+    name='pwrentch',
     version=version,
     description="Common Django functionality library",
     classifiers=[
@@ -23,4 +23,3 @@ setup(
     zip_safe=False,
     install_requires=[],
 )
-
