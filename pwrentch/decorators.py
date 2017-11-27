@@ -1,5 +1,8 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
+from django.utils.decorators import available_attrs
+
+from functools import wraps
 
 
 def login_required(function=None,
@@ -29,3 +32,23 @@ def login_required(function=None,
     if function:
         return actual_decorator(function)
     return actual_decorator
+
+
+def never_cache(view_func):
+    """Add headers to a view function's HTTP response to avoid caching
+
+    Improves upon Django's built in @never_cache decorator by specifying
+    an expiration date in the past and providing the 'Pragma' header.
+
+    Arguments:
+        view_func {object} -- the view function being decorated
+    """
+    @wraps(view_func, assigned=available_attrs(view_func))
+    def _wrapped_view_func(request, *args, **kwargs):
+        response = view_func(request, *args, **kwargs)
+        if response.status_code not in (301, 302):
+            response['Cache-Control'] = 'no-cache,no-store'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = 'Tue, 01 Jan 1980 1:00:00 GMT'
+        return response
+    return _wrapped_view_func
